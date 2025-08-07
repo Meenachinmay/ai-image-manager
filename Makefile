@@ -1,39 +1,47 @@
-.PHONY: help install run test clean docker-up docker-down migrate
+.PHONY: help run dev install clean test logs
 
 help:
 	@echo "Available commands:"
-	@echo "  make install      Install dependencies"
-	@echo "  make run          Run the application locally"
-	@echo "  make test         Run tests"
-	@echo "  make clean        Clean up cache files"
-	@echo "  make docker-up    Start Docker containers"
-	@echo "  make docker-down  Stop Docker containers"
-	@echo "  make migrate      Run database migrations"
+	@echo "  make install  - Install dependencies"
+	@echo "  make run      - Run the worker locally"
+	@echo "  make dev      - Run with docker-compose"
+	@echo "  make clean    - Clean up containers"
+	@echo "  make test     - Run tests"
+	@echo "  make logs     - Show worker logs"
 
 install:
 	pip install -r requirements.txt
 
 run:
-	python run.py
+	python -m app.main
 
-test:
-	pytest tests/ -v
-
-clean:
-	find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
-	find . -type f -name "*.pyc" -delete
-
-docker-up:
+dev:
 	docker compose up --build
 
-docker-down:
+dev-detached:
+	docker compose up -d --build
+
+down:
+	docker compose down
+
+clean:
 	docker compose down -v
 
-migrate:
-	docker-compose exec db psql -U postgres -d face_recognition -f /docker-entrypoint-initdb.d/init.sql
+test:
+	pytest tests/
 
 logs:
-	docker-compose logs -f app
+	docker compose logs -f face-recognition-worker
 
-shell:
-	docker-compose exec app /bin/bash
+rebuild:
+	docker compose build --no-cache face-recognition-worker
+	docker compose up
+
+# Database commands
+db-shell:
+	docker compose exec db psql -U postgres -d face_recognition_local
+
+db-reset:
+	docker compose exec db psql -U postgres -c "DROP DATABASE IF EXISTS face_recognition_local;"
+	docker compose exec db psql -U postgres -c "CREATE DATABASE face_recognition_local;"
+	docker compose restart face-recognition-worker

@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 from pathlib import Path  # THIS IMPORT WAS MISSING!
 from fastapi import UploadFile
 import redis
@@ -228,3 +228,57 @@ class FaceService(IFaceService):
                 self.redis_client.delete("face_encodings_cache")
 
         return success
+
+    # Add this method to your existing FaceService class
+    async def process_image_from_event(
+            self,
+            image_bytes: bytes,
+            filename: str,
+            person_name: Optional[str] = None,
+            image_id: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """
+        Process image from RabbitMQ event.
+        This wraps the existing logic to work with events.
+        """
+        from pathlib import Path
+
+        # Check file extension from filename
+        file_ext = Path(filename).suffix.lower()
+        if file_ext not in self.settings.allowed_extensions:
+            return {
+                "success": False,
+                "image_id": image_id,
+                "message": f"File type {file_ext} not allowed"
+            }
+
+        # Extract face encoding
+        face_encoding = self.recognition_engine.extract_face_encoding(image_bytes)
+
+        if face_encoding is None:
+            return {
+                "success": False,
+                "image_id": image_id,
+                "person_name": None,
+                "confidence": 0.0,
+                "message": "No face detected in the image",
+                "faces_found": 0
+            }
+
+        # Use existing logic for registration or identification
+        if person_name:
+            result = await self._register_new_person(person_name, face_encoding, image_bytes, file_ext)
+        else:
+            result = await self._identify_person(face_encoding, image_bytes, file_ext)
+
+        # Add image_id to result
+        return {
+            "success": result.success,
+            "image_id": image_id,
+            "person_name": result.person_name,
+            "confidence": result.confidence,
+            "image_path": result.image_path,
+            "message": result.message,
+            "is_new_person": result.is_new_person,
+            "faces_found": 1 if result.success else 0
+        }

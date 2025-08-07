@@ -1,15 +1,15 @@
 version: '3.8'
 
 services:
-  app:
+  face-recognition-worker:  # Renamed from 'app' since it's no longer a web app
     build:
       context: .
-      dockerfile: docker/DockerFile
-    ports:
-      - "8000:8000"
+      dockerfile: docker/Dockerfile  # Fix typo: Dockerfile -> Dockerfile
+    # Remove ports since we don't need HTTP anymore
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/face_recognition_local
       - REDIS_URL=redis://redis:6379
+      - RABBITMQ_URL=amqp://admin:admin123@ai-image-rabbitmq-local:5672/  # Updated to use rabbitmq service
       - UPLOAD_PATH=/app/uploads
     volumes:
       - ./uploads:/app/uploads
@@ -18,6 +18,8 @@ services:
       - redis
     networks:
       - face-net
+      - api-gateway_api-network
+    restart: unless-stopped
 
   db:
     image: postgres:16-alpine
@@ -46,3 +48,5 @@ volumes:
 networks:
   face-net:
     driver: bridge
+  api-gateway_api-network:
+    external: true
