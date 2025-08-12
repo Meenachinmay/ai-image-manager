@@ -1,6 +1,6 @@
 # Face Recognition Service
 
-A production-grade face recognition backend service built with FastAPI, PostgreSQL, and face_recognition library.
+A production-grade face recognition backend service built with RabbitMQ, PostgreSQL, and face_recognition library.
 
 ## Features
 
@@ -10,12 +10,11 @@ A production-grade face recognition backend service built with FastAPI, PostgreS
 - 🚀 High-performance with Redis caching
 - 🐳 Docker-ready deployment
 - 🏗️ Clean architecture with repository pattern
-- 🔧 RESTful API with OpenAPI documentation
 
 ## Tech Stack
 
 - **Python 3.11+**
-- **FastAPI** - Modern web framework
+- **RabbitMq**
 - **PostgreSQL** - Primary database
 - **Redis** - Caching layer
 - **face_recognition** - Face detection and recognition
@@ -36,5 +35,3 @@ cp .env.example .env
 
 # Start services
 docker-compose up --build
-
-# Service will be available at http://localhost:8000
