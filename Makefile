@@ -27,19 +27,12 @@ down:
 clean:
 	docker compose down -v
 
-test:
-	pytest tests/
-
 logs:
 	docker compose logs -f face-recognition-worker
 
 rebuild:
 	docker compose build --no-cache face-recognition-worker
 	docker compose up
-
-# Database commands
-db-shell:
-	docker compose exec db psql -U postgres -d face_recognition_local
 
 db-reset:
 	docker compose exec db psql -U postgres -c "DROP DATABASE IF EXISTS face_recognition_local;"
