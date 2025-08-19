@@ -11,6 +11,15 @@ A production-grade face recognition backend service built with RabbitMQ, Postgre
 - 🐳 Docker-ready deployment
 - 🏗️ Clean architecture with repository pattern
 
+## Features which are yet to implement (時間が足りてなくて実装できませんでした。)
+- Publish rabbitmq event from python service
+- implement rate limiting
+- implement authentication flow
+- implement aws S3 storage bucket for storage
+- implement CI/CD pipeline
+- writing tests code for entire project
+- handle message loss in the queue
+
 ## Tech Stack
 
 - **Python 3.11+**
